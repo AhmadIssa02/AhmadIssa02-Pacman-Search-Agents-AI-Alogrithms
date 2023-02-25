@@ -96,7 +96,7 @@ def depthFirstSearch(problem: SearchProblem):
     #indicating that this is the start node (it has not parents)
     stack = util.Stack()
     stack.push(start)
-    while stack.isEmpty() == False:
+    while not stack.isEmpty():
         node = stack.pop()
         
         if problem.isGoalState((node['state'])):
@@ -129,7 +129,7 @@ def breadthFirstSearch(problem: SearchProblem):
     start = {'state':problem.getStartState(),'action': actions, 'cost':0}
     queue = util.Queue()
     queue.push(start)
-    while queue.isEmpty() == False:
+    while not queue.isEmpty():
         node = queue.pop()
 
         if problem.isGoalState((node['state'])):
@@ -155,7 +155,34 @@ def breadthFirstSearch(problem: SearchProblem):
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = set() 
+    actions = []    
+    start = {'state':problem.getStartState(),'action': actions, 'cost':0}   
+    pQueue = util.PriorityQueue()
+    pQueue.push(start,0)
+    while not pQueue.isEmpty():
+        node = pQueue.pop()    
+        visited.add(node['state'])
+
+        if problem.isGoalState((node['state'])):
+            while 'parentNode' in node:
+                actions.append(node['action'])
+                node = node['parentNode']
+            actions.reverse()
+            return actions
+            
+        for neighbor in problem.getSuccessors((node['state'])):
+            neighbor = {'state': neighbor[0], 'action':neighbor[1], 'cost':neighbor[2], 'parentNode': node}
+            if (neighbor['state']) not in visited:
+                neighbor['cost'] = node['cost'] + neighbor['cost']
+                pQueue.push(neighbor, neighbor['cost'])
+                visited.add(neighbor['state'])
+               
+
+  
+            
+
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -167,7 +194,40 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #print(heuristic(problem.getStartState(), problem))
+    visited = set()
+    actions = []
+    start = {'state':problem.getStartState(),'action': actions, 'cost':0}
+    pQueue = util.PriorityQueue()
+    f = heuristic(problem.getStartState(), problem) + start['cost']
+    pQueue.push(start,f)
+    while not pQueue.isEmpty():
+        node = pQueue.pop()
+        if node['state'] not in visited:
+            visited.add(node['state'])
+        if problem.isGoalState((node['state'])):
+            while 'parentNode' in node:
+                actions.append(node['action'])
+                node = node['parentNode']
+            actions.reverse()
+            return actions
+ 
+        
+        for neighbor in problem.getSuccessors((node['state'])):
+           neighbor = {'state': neighbor[0], 'action':neighbor[1], 'cost':neighbor[2], 'parentNode': node}
+        #    if problem.isGoalState(neighbor['state']):
+        #         actions.append(neighbor['action'])
+        #         neighbor = node
+        #         while 'parentNode' in node:
+        #             actions.append(node['action'])
+        #             node = node['parentNode']
+        #         actions.reverse()
+        #         return actions
+           if (neighbor['state']) not in visited:
+            g = node['cost'] + neighbor['cost']
+            f = (heuristic(neighbor['state'], problem) + g)   
+            pQueue.push(neighbor, f)
+            visited.add(neighbor['state'])
 
 
 # Abbreviations
