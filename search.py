@@ -18,7 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-import pacman
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -131,7 +131,7 @@ def breadthFirstSearch(problem: SearchProblem):
     queue.push(start)
     while not queue.isEmpty():
         node = queue.pop()
-
+        
         if problem.isGoalState((node['state'])):
             return actions
         
@@ -159,10 +159,13 @@ def uniformCostSearch(problem: SearchProblem):
     actions = []    
     start = {'state':problem.getStartState(),'action': actions, 'cost':0}   
     pQueue = util.PriorityQueue()
-    pQueue.push(start,0)
+    pQueue.push(start,0) #0 is the initial cost of the start node, it will be increased as the search goes on
     while not pQueue.isEmpty():
         node = pQueue.pop()    
         visited.add(node['state'])
+        
+        #here we are applying the goal test when expanding the node not when pushing it to the queue
+        #this is because we want to make sure that the goal is the node with the least cost, not the first one we find
 
         if problem.isGoalState((node['state'])):
             while 'parentNode' in node:
@@ -199,35 +202,29 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     actions = []
     start = {'state':problem.getStartState(),'action': actions, 'cost':0}
     pQueue = util.PriorityQueue()
-    f = heuristic(problem.getStartState(), problem) + start['cost']
+    f = heuristic(problem.getStartState(), problem) + start['cost']#f = g + h, where g is the actual cost and h is the heuristic 
     pQueue.push(start,f)
     while not pQueue.isEmpty():
         node = pQueue.pop()
         if node['state'] not in visited:
             visited.add(node['state'])
-        if problem.isGoalState((node['state'])):
-            while 'parentNode' in node:
-                actions.append(node['action'])
-                node = node['parentNode']
-            actions.reverse()
-            return actions
- 
-        
         for neighbor in problem.getSuccessors((node['state'])):
            neighbor = {'state': neighbor[0], 'action':neighbor[1], 'cost':neighbor[2], 'parentNode': node}
-        #    if problem.isGoalState(neighbor['state']):
-        #         actions.append(neighbor['action'])
-        #         neighbor = node
-        #         while 'parentNode' in node:
-        #             actions.append(node['action'])
-        #             node = node['parentNode']
-        #         actions.reverse()
-        #         return actions
+          
+           if problem.isGoalState(neighbor['state']):
+                actions.append(neighbor['action'])
+                neighbor = node
+                while 'parentNode' in node:
+                    actions.append(node['action'])
+                    node = node['parentNode']
+                actions.reverse()
+                return actions
+           
            if (neighbor['state']) not in visited:
-            g = node['cost'] + neighbor['cost']
-            f = (heuristic(neighbor['state'], problem) + g)   
-            pQueue.push(neighbor, f)
-            visited.add(neighbor['state'])
+                g = node['cost'] + neighbor['cost'] #g is the actual cumulative cost
+                f = (heuristic(neighbor['state'], problem) + g)  
+                pQueue.push(neighbor, f)
+                visited.add(neighbor['state'])
 
 
 # Abbreviations

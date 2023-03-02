@@ -77,3 +77,33 @@
             if (neighbor[0]) not in visited:
                 pQueue.append([neighbor,neighbor[2]])
           
+def breadthFirstSearch(problem: SearchProblem):
+    """Search the shallowest nodes in the search tree first."""
+    "*** YOUR CODE HERE ***"
+    visited = set()
+    actions = [] 
+    start = {'state':problem.getStartState(),'action': actions, 'cost':0}
+    queue = util.Queue()
+    queue.push(start)
+    while not queue.isEmpty():
+        node = queue.pop()
+
+        if problem.isGoalState((node['state'])):
+            return actions
+        
+        if (node['state']) not in visited:
+            visited.add((node['state']))
+
+        for neighbor in problem.getSuccessors((node['state'])):
+            neighbor = {'state': neighbor[0], 'action':neighbor[1], 'cost':neighbor[2], 'parentNode': node}
+            if problem.isGoalState(neighbor['state']):
+                actions.append(neighbor['action'])
+                neighbor = node
+                while 'parentNode' in node:
+                    actions.append(node['action'])
+                    node = node['parentNode']
+                actions.reverse()
+                return actions
+            
+            if (neighbor['state']) not in visited:
+                queue.push(neighbor)

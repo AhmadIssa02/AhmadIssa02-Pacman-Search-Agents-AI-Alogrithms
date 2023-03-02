@@ -4,4 +4,6 @@ import search
 import pacman
 dx, dy = Actions.directionToVector(Directions.SOUTH)
 print(dx, dy)
-walls = gameState.getWalls()
+# walls = gameState.getWalls()
+arr = [3,2,1]
+print(arr.__len__())
