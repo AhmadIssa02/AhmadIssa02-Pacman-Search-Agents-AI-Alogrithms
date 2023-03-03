@@ -247,7 +247,7 @@ class StayWestSearchAgent(SearchAgent):
     An agent for position search with a cost function that penalizes being in
     positions on the East side of the board.
 
-    The cost function for stepping into a position (x,y) is 2^x.
+    The cost function for stepping into a position (x,y) is 2^x. 
     """
     def __init__(self):
         self.searchFunction = search.uniformCostSearch
@@ -273,7 +273,6 @@ def euclideanHeuristic(position, problem, info={}):
 class CornersProblem(search.SearchProblem):
     """
     This search problem finds paths through all four corners of a layout.
-
     You must select a suitable state space and successor function
     """
 
@@ -292,7 +291,6 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.visitedCorners = []
         
 
     def getStartState(self):
@@ -301,7 +299,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition
+        return (self.startingPosition, [])
 
     def isGoalState(self, state: Any):
         """
@@ -309,15 +307,17 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
 
-        if(state in self.corners and state not in self.visitedCorners):
-            self.visitedCorners.append(state)
-
-        return (self.visitedCorners.__len__() == 4)
+        current = state[0]
+        visitedCorners = state[1]
+        if current in self.corners:
+            if current not in visitedCorners:
+                visitedCorners.append(current)
+            return len(visitedCorners)==4
+        return False 
 
     def getSuccessors(self, state: Any):
         """
         Returns successor states, the actions they require, and a cost of 1.
-
          As noted in search.py:
             For a given state, this should return a list of triples, (successor,
             action, stepCost), where 'successor' is a successor to the current
@@ -335,14 +335,22 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            x,y = state
+            x,y = state[0]
+            visitedCorners = state[1]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
+            nextNode = (nextx, nexty)
             if not self.walls[nextx][nexty]:
-                successors.append(((nextx, nexty), action, 1))
+                newVisitedCorners = list(visitedCorners) 
+                if nextNode in self.corners:
+                    if nextNode not in newVisitedCorners:
+                        newVisitedCorners.append( nextNode )
+                successor = ((nextNode, newVisitedCorners), action, 1)
+                successors.append(successor)
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
+
 
     def getCostOfActions(self, actions):
         """
@@ -356,7 +364,6 @@ class CornersProblem(search.SearchProblem):
             x, y = int(x + dx), int(y + dy)
             if self.walls[x][y]: return 999999
         return len(actions)
-
 
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """

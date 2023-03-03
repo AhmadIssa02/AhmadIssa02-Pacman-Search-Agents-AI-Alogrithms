@@ -90,67 +90,41 @@ def depthFirstSearch(problem: SearchProblem):
     # print("Start:", problem.getStartState(), type(problem.getStartState()))
     # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    visited = set()#explored nodes
-    actions = [] #actions to reach the goal, will be returned
-    start = {'state':problem.getStartState(),'action': actions, 'cost':0}
-    #indicating that this is the start node (it has not parents)
-    stack = util.Stack()
-    stack.push(start)
-    while not stack.isEmpty():
-        node = stack.pop()
-        
-        if problem.isGoalState((node['state'])):
-            return actions  #if the start node is the goal, return the empty list of actions
-        
-        if (node['state']) not in visited:
-            visited.add((node['state'])) #add the node to the explored nodes
-
-        for neighbor in problem.getSuccessors((node['state'])):
-            neighbor = {'state': neighbor[0], 'action':neighbor[1], 'cost':neighbor[2], 'parentNode': node}
-            #adding the parent node to the neighbor in order to get the path
-            if problem.isGoalState(neighbor['state']):
-                actions.append(neighbor['action'])
-                neighbor = node
-                #following the path to the start node
-                while 'parentNode' in node:
-                    actions.append(node['action'])
-                    node = node['parentNode']
-                actions.reverse()
-                return actions
-            
-            if (neighbor['state']) not in visited:
-                stack.push(neighbor)
-          
+    Frontier = util.Stack()
+    visited = []
+    Frontier.push((problem.getStartState(), []))
+    while not Frontier.isEmpty():
+        node = Frontier.pop()
+        state = node[0]
+        actions = node[1]
+        for neighbor in problem.getSuccessors(state):
+            neighborState = neighbor[0]
+            action = neighbor[1]
+            if neighborState not in visited:
+                if problem.isGoalState(neighborState):
+                    return actions + [action]
+                Frontier.push((neighborState, actions + [action]))
+                visited.append(neighborState)
+       
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    visited = set()
-    actions = [] 
-    start = {'state':problem.getStartState(),'action': actions, 'cost':0}
-    queue = util.Queue()
-    queue.push(start)
-    while not queue.isEmpty():
-        node = queue.pop()
-        
-        if problem.isGoalState((node['state'])):
-            return actions
-        
-        if (node['state']) not in visited:
-            visited.add((node['state']))
-
-        for neighbor in problem.getSuccessors((node['state'])):
-            neighbor = {'state': neighbor[0], 'action':neighbor[1], 'cost':neighbor[2], 'parentNode': node}
-            if problem.isGoalState(neighbor['state']):
-                actions.append(neighbor['action'])
-                neighbor = node
-                while 'parentNode' in node:
-                    actions.append(node['action'])
-                    node = node['parentNode']
-                actions.reverse()
-                return actions
-            
-            if (neighbor['state']) not in visited:
-                queue.push(neighbor)
+    Frontier = util.Queue()
+    visited = []
+    Frontier.push((problem.getStartState(), []))
+    while Frontier.isEmpty() == 0:
+        node = Frontier.pop()
+        state = node[0]
+        actions = node[1]
+        for neighbor in problem.getSuccessors(state):
+            neighborState = neighbor[0]
+            action = neighbor[1]
+            if neighborState not in visited:
+                if problem.isGoalState(neighborState):
+                    return actions + [action]
+                Frontier.push((neighborState, actions + [action]))
+                visited.append( neighborState )
+ 
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
@@ -200,31 +174,34 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     #print(heuristic(problem.getStartState(), problem))
     visited = set()
     actions = []
-    start = {'state':problem.getStartState(),'action': actions, 'cost':0}
     pQueue = util.PriorityQueue()
-    f = heuristic(problem.getStartState(), problem) + start['cost']#f = g + h, where g is the actual cost and h is the heuristic 
-    pQueue.push(start,f)
+    g = 0
+    f = heuristic(problem.getStartState(), problem) + g #f = g + h, where g is the actual cumulative cost and h is the heuristic 
+    
+    pQueue.push((problem.getStartState(),actions, g),f)
     while not pQueue.isEmpty():
         node = pQueue.pop()
-        if node['state'] not in visited:
-            visited.add(node['state'])
-        for neighbor in problem.getSuccessors((node['state'])):
-           neighbor = {'state': neighbor[0], 'action':neighbor[1], 'cost':neighbor[2], 'parentNode': node}
-          
-           if problem.isGoalState(neighbor['state']):
-                actions.append(neighbor['action'])
-                neighbor = node
-                while 'parentNode' in node:
-                    actions.append(node['action'])
-                    node = node['parentNode']
-                actions.reverse()
-                return actions
-           
-           if (neighbor['state']) not in visited:
-                g = node['cost'] + neighbor['cost'] #g is the actual cumulative cost
-                f = (heuristic(neighbor['state'], problem) + g)  
-                pQueue.push(neighbor, f)
-                visited.add(neighbor['state'])
+        state = node[0]
+        actions = node[1]
+        cost = node[2]
+
+        if(problem.isGoalState(state)):
+            return actions
+
+        for neighbor in problem.getSuccessors(state):
+
+            neighborState = neighbor[0]
+            neighborAction = neighbor[1]
+            neighborCost = neighbor[2]
+            
+            if problem.isGoalState(neighborState):
+                return actions + [neighborAction]
+            
+            if (neighborState) not in visited:
+                g = cost + neighborCost #g is the actual cumulative cost
+                f = (heuristic(state, problem) + g)  
+                pQueue.push((neighborState, actions+[neighborAction], g), f)
+                visited.add(neighborState)
 
 
 # Abbreviations
