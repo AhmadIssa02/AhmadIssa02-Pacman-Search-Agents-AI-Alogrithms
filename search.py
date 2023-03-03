@@ -199,7 +199,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
             
             if (neighborState) not in visited:
                 g = cost + neighborCost #g is the actual cumulative cost
-                f = (heuristic(state, problem) + g)  
+                f = (heuristic(neighborState, problem) + g)  
                 pQueue.push((neighborState, actions+[neighborAction], g), f)
                 visited.add(neighborState)
 
