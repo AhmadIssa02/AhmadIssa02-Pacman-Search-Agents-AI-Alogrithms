@@ -548,7 +548,8 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        return search.bfs(problem)
+        #we use the search.bfs function to find the path to the closest dot
+        return search.bfs(problem) 
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -585,7 +586,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        foodList = self.food.asList()   
+        #our goal is any node in the food list
+        foodList = self.food.asList() 
         return state in foodList
         #util.raiseNotDefined()
 

@@ -154,12 +154,6 @@ def uniformCostSearch(problem: SearchProblem):
                 neighbor['cost'] = node['cost'] + neighbor['cost']
                 pQueue.push(neighbor, neighbor['cost'])
                 visited.add(neighbor['state'])
-               
-
-  
-            
-
-
 
 def nullHeuristic(state, problem=None):
     """
@@ -176,7 +170,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     pQueue = util.PriorityQueue()
     g = 0
     f = heuristic(problem.getStartState(), problem) + g #f = g + h, where g is the actual cumulative cost and h is the heuristic 
-    pQueue.push((problem.getStartState(),actions, g),f) #push the start node to the queue with the heuristic being its priority
+    pQueue.push((problem.getStartState(),actions, g), f) #push the start node to the queue with the heuristic being its priority
     while not pQueue.isEmpty():
         node = pQueue.pop()
         state = node[0]
