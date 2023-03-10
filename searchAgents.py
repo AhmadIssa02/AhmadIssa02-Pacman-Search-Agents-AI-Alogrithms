@@ -344,7 +344,7 @@ class CornersProblem(search.SearchProblem):
                 newVisitedCorners = list(visitedCorners) 
                 if nextNode in self.corners:
                     if nextNode not in newVisitedCorners:
-                        newVisitedCorners.append( nextNode )
+                        newVisitedCorners.append(nextNode)
                 successor = ((nextNode, newVisitedCorners), action, 1)
                 successors.append(successor)
 
@@ -365,6 +365,9 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+
+
+
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -381,15 +384,28 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-
     "*** YOUR CODE HERE ***"
-    
+    pos,visited_corners = state  
+    def euclideanDistance(p1, p2): 
+        xy1 = p1
+        xy2 = p2
+        return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
 
-
-
-
-    
-    return 0 # Default to trivial solution
+    # Here, I was trying different heuristics and I chose the one that gave me the best result
+    #  def manhattanDistance(p1, p2):
+        # xy1 = p1 
+        # xy2 = p2
+        # return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+    # def chebyshevDistance(point1, point2):
+    #    return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1]))
+    # def octileDistance(p1, p2):
+    #     dx = abs(p1[0] - p2[0])
+    #     dy = abs(p1[1] - p2[1])
+    #     return max(dx, dy) + 0.414 * min(dx, dy)
+    # if pos in visited_corners:
+    #     return 0
+    corner_distances = [ euclideanDistance(pos, corner) for corner in corners if corner not in visited_corners]
+    return max(corner_distances)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -483,6 +499,23 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    def manhattanDistance(p1, p2):
+        xy1 = p1 
+        xy2 = p2
+        return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+
+    # Here, I was trying different heuristics and I chose the one that gave me the best result
+    # def euclideanDistance(p1, p2): 
+    #     xy1 = p1
+    #     xy2 = p2
+    #     return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
+
+    # def chebyshevDistance(point1, point2):
+    #     """    Computes the Chebyshev distance between two points.     """
+    #     return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1])) 
+    food_distances = [manhattanDistance(position, food) for food in foodGrid.asList()]
+    return max(food_distances)
+   
     return 0
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -514,7 +547,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """

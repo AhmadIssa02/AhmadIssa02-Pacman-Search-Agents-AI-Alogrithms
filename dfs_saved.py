@@ -245,3 +245,135 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
                 pQueue.push(neighbor, f)
                 visited.add(neighbor['state'])
 
+def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
+    #print(heuristic(problem.getStartState(), problem))
+    visited = set()
+    actions = []
+    pQueue = util.PriorityQueue()
+    g = 0
+    f = heuristic(problem.getStartState(), problem) + g #f = g + h, where g is the actual cumulative cost and h is the heuristic 
+    
+    pQueue.push((problem.getStartState(),actions, g),f)
+    print("start state" , problem.getStartState())
+    while not pQueue.isEmpty():
+        node = pQueue.pop()
+        #print("node", node)
+        state = node[0]
+        actions = node[1]
+        cost = node[2]
+        #print("state", state)
+        if(problem.isGoalState(state)):
+            return actions
+            
+
+        for neighbor in problem.getSuccessors(state):
+            #print("neighbor",neighbor)
+            neighborState = neighbor[0]
+            neighborAction = neighbor[1]
+            neighborCost = neighbor[2]
+            #print("neighbor state", neighborState)
+            if problem.isGoalState(neighborState):
+                return actions + [neighborAction]
+            
+            if (neighborState) not in visited:
+                g = cost + neighborCost #g is the actual cumulative cost
+                #print("neighbor State" , neighborState)
+                f = (heuristic(neighborState, problem) + g)    
+                pQueue.push((neighborState, actions+[neighborAction], g), f)
+                visited.add(neighborState)
+
+
+def cornersHeuristic(state: Any, problem: CornersProblem):
+    """
+    A heuristic for the CornersProblem that you defined.
+
+      state:   The current search state
+               (a data structure you chose in your search problem)
+
+      problem: The CornersProblem instance for this layout.
+
+    This function should always return a number that is a lower bound on the
+    shortest path from the state to a goal of the problem; i.e.  it should be
+    admissible (as well as consistent).
+    """
+    corners = problem.corners # These are the corner coordinates
+    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+
+    "*** YOUR CODE HERE ***"
+    def chebyshevDistance(point1, point2):
+        """    Computes the Chebyshev distance between two points.     """
+        return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1]))
+    
+    # remaining_corners = list(filter(lambda x: x not in state.visited_corners, corners))
+    # if not remaining_corners:
+    #     return 0  # We've visited all the corners, so the distance is zero
+    # nearest_corner = min(remaining_corners, key=lambda x: chebyshevDistance(state.current_position, x))
+
+    # # Add up the estimated distances to the remaining corners and return the result
+    # estimated_distances = [chebyshevDistance(nearest_corner, corner) for corner in remaining_corners]
+    # return max(estimated_distances)
+    corner_distances = [abs(state[0][0] - corner[0]) + abs(state[0][1] - corner[1]) for corner in corners if corner not in state[1]]
+    
+    return max(corner_distances)
+
+
+def cornersHeuristic(state: Any, problem: CornersProblem):
+    """
+    A heuristic for the CornersProblem that you defined.
+
+      state:   The current search state
+               (a data structure you chose in your search problem)
+
+      problem: The CornersProblem instance for this layout.
+
+    This function should always return a number that is a lower bound on the
+    shortest path from the state to a goal of the problem; i.e.  it should be
+    admissible (as well as consistent).
+    """
+    corners = problem.corners # These are the corner coordinates
+    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    def octileDistance(p1, p2):
+        dx = abs(p1[0] - p2[0])
+        dy = abs(p1[1] - p2[1])
+        return max(dx, dy) + 0.414 * min(dx, dy)
+    position, visited_corners = state
+
+    # Check if all corners have been visited
+    if len(visited_corners) == len(corners):
+        return 0
+
+    # Calculate distances from current position to unvisited corners
+    unvisited_corners = [corner for corner in corners if corner not in visited_corners]
+    distances = [octileDistance(position, corner) for corner in unvisited_corners]
+
+    # Return the sum of the minimum distances
+    return sum(distances)
+    return 0 # Default to trivial solution
+
+
+ gs = problem.startingGameState
+    foodList = foodGrid.asList()
+    foodCount = len(foodList)
+    max_dis = 0
+    part_max_dis = 0
+    #print("foodCount:", foodCount)
+    
+
+    # for i in range(foodCount):
+    #     for ii in range(foodCount-i-1):
+    #         dis = mazeDistance(foodList[i],foodList[ii+1],gs)
+    #         if dis > max_dis:
+    #             max_dis = dis
+    #             furthest1 = foodList[i]
+    #             furthest2 = foodList[ii+1]
+    #             part1 = mazeDistance(position,foodList[i],gs)
+    #             part2 = mazeDistance(position,foodList[ii+1],gs)
+    #             if part1 > part2:
+    #                 part_max_dis = part2
+    #             else:
+    #                 part_max_dis = part1
+    
+    # return max_dis+part_max_dis 
+    
