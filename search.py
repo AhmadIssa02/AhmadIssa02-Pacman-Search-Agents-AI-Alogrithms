@@ -176,7 +176,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     pQueue = util.PriorityQueue()
     g = 0
     f = heuristic(problem.getStartState(), problem) + g #f = g + h, where g is the actual cumulative cost and h is the heuristic 
-    pQueue.push((problem.getStartState(),actions, g),f)
+    pQueue.push((problem.getStartState(),actions, g),f) #push the start node to the queue with the heuristic being its priority
     while not pQueue.isEmpty():
         node = pQueue.pop()
         state = node[0]
@@ -184,7 +184,6 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
         cost = node[2]
         if(problem.isGoalState(state)):
             return actions
-            
 
         for neighbor in problem.getSuccessors(state):
             neighborState = neighbor[0]
@@ -195,7 +194,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
                 return actions + [neighborAction]
             
             if (neighborState) not in visited:
-                if heuristic(state, problem) >( neighborCost + heuristic(neighborState, problem)):
+                if heuristic(state, problem) > (neighborCost + heuristic(neighborState, problem)):#checking if my heuristic is consistent
                     print("heuristic is inconsistent")
                 g = cost + neighborCost #g is the actual cumulative cost
                 f = (heuristic(neighborState, problem) + g)    

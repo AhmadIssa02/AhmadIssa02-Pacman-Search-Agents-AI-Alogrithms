@@ -299,6 +299,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        # I added a list to keep track of visited corners
         return (self.startingPosition, [])
 
     def isGoalState(self, state: Any):
@@ -310,7 +311,7 @@ class CornersProblem(search.SearchProblem):
         current = state[0]
         visitedCorners = state[1]
         if current in self.corners:
-            if current not in visitedCorners:
+            if current not in visitedCorners: # if the current position is a corner and it has not been visited
                 visitedCorners.append(current)
             return len(visitedCorners)==4
         return False 
@@ -385,26 +386,26 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    pos,visited_corners = state  
-    def euclideanDistance(p1, p2): 
-        xy1 = p1
+    pos, visitedCorners = state 
+    # I used the manhattan distance heuristic to calculate the distance from the current position to the closest corner
+    def manhattanDistance(p1, p2):
+        xy1 = p1 
         xy2 = p2
-        return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
-
-    # Here, I was trying different heuristics and I chose the one that gave me the best result
-    #  def manhattanDistance(p1, p2):
-        # xy1 = p1 
+        return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        
+    # Here, I was trying different heuristics and chose the one that gave me the best results
+    #  def euclideanDistance(p1, p2): 
+        # xy1 = p1
         # xy2 = p2
-        # return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        # return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
     # def chebyshevDistance(point1, point2):
     #    return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1]))
     # def octileDistance(p1, p2):
     #     dx = abs(p1[0] - p2[0])
     #     dy = abs(p1[1] - p2[1])
     #     return max(dx, dy) + 0.414 * min(dx, dy)
-    # if pos in visited_corners:
-    #     return 0
-    corner_distances = [ euclideanDistance(pos, corner) for corner in corners if corner not in visited_corners]
+
+    corner_distances = [ manhattanDistance(pos, corner) for corner in corners if corner not in visitedCorners]
     return max(corner_distances)
 
 class AStarCornersAgent(SearchAgent):
@@ -499,24 +500,24 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    def manhattanDistance(p1, p2):
-        xy1 = p1 
-        xy2 = p2
-        return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+    #my heuristic returns the maximum distance from my current state to any remaining food nodes that are not yet visited.
+    foodList = foodGrid.asList()
+    if not foodList: #if the foodList is empty, the heuristic is 0 as there is no food left
+        return 0
 
-    # Here, I was trying different heuristics and I chose the one that gave me the best result
-    # def euclideanDistance(p1, p2): 
-    #     xy1 = p1
-    #     xy2 = p2
-    #     return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
+    maximumDistance = 0 #initialized as 0, then we update it every time we find a new max distance
+    for food in foodList:
+        key = position + food #we use the position and food as a key to store the distance in the heuristicInfo dictionary
+        if key in problem.heuristicInfo:
+            distance = problem.heuristicInfo[key] #if the key is in the dictionary, we use the stored distance
+        else:
+            distance = mazeDistance(position, food, problem.startingGameState) #if the key is not in the dictionary, we calculate the distance
+            problem.heuristicInfo[key] = distance #we store the distance in the dictionary to save time the next time we are in this state and need to calculate the distance to the same food node
 
-    # def chebyshevDistance(point1, point2):
-    #     """    Computes the Chebyshev distance between two points.     """
-    #     return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1])) 
-    food_distances = [manhattanDistance(position, food) for food in foodGrid.asList()]
-    return max(food_distances)
-   
-    return 0
+        if distance > maximumDistance:
+            maximumDistance = distance
+
+    return maximumDistance
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -547,7 +548,8 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        #util.raiseNotDefined()
+        return search.bfs(problem)
+
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -583,7 +585,9 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        foodList = self.food.asList()   
+        return state in foodList
+        #util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """
